@@ -3,18 +3,14 @@ import peer, { name_of_room } from './Peer'
 import { share_file, bufferArrayuni } from './FileShare/File.js'
 import Success from './Success'
 import { v4 as uuid } from 'uuid'
-import chunks from 'chunk-stream'
-
 import { from } from 'rxjs'
-// import { combaine } from './FileShare/Combine'
-// import { filter, map } from 'rxjs/operators'
-// import { Ripme, recievedFile } from './FileShare/PromiseFile'
-
 import './Chat.css'
 import { combaine } from './FileShare/Combine'
+// import speedometer from 'speedometer'
+import formatBytes from '../../Tools/FileConvertor'
+
 let array = []
-const chunkStream = chunks(16000)
-chunkStream.pipe(peer)
+// let speed = speedometer()
 
 export default function Chat() {
   //handle state
@@ -109,7 +105,6 @@ export default function Chat() {
   //handle Incoming Message
   useEffect(() => {
     const handleIncomingMessage = (data) => {
-      // console.log(JSON.parse(data))
       //TODO:Hadling files that are recievied ⌛
 
       const update = (newData) => {
@@ -122,26 +117,21 @@ export default function Chat() {
 
         if (parsed.type === 'text/plain') {
           update(parsed)
-          // console.log(parsed)
         } else if (parsed.final) {
-          // console.log('Im here')
           setFinal(parsed)
         } else {
           if (parsed.initial) {
             setType({ type: parsed.type })
           }
-          // console.log(parsed)
+
           let message = combaine(parsed)
 
-          // console.log(message)
           update(message)
         }
       } catch (err) {
         // console.log(err)
         let condition = new TextDecoder('utf-8').decode(data)
         if (condition === 'final') {
-          // console.log(condition)
-          // console.log('The final thing called')
           let buffer = new Blob(array, {
             type: Filetype.type,
           })
@@ -211,25 +201,24 @@ export default function Chat() {
         window.location.hash === '#init'
           ? name_of_room[1].split('-')[0]
           : 'Friend',
-      message: 'You are sending a file',
+      message: `Sending a file with size ${formatBytes(file_data.size)} `,
       type: 'text/plain',
       sentAt: Date.now(),
     }
     setMessage((old) => [...old, datas])
-    // chunkStream.write(demo)
 
     let share = await share_file(file_data)
     peer.send(JSON.stringify(bufferArrayuni[0]))
-    // console.log(bufferArrayuni)
-    // console.log('Raw Data from the chunk', share)
     if (share.slice(-1)[0].byteLength === 0) {
       const stream = from(share)
       stream.subscribe((data) => {
-        // console.log('Sending the file: and the file is:', new Buffer.from(data))
+        console.log(formatBytes(speed(data.byteLength)))
+        // let int = setInterval(function () {
+        //   setSpeed(formatBytes(speed(data.byteLength)))
+        // })
+
         peer.write(new Buffer.from(data), () => {
-          // console.log('Send the chunk:', data)
           if (data.byteLength === 0) {
-            // peer.send(JSON.stringify(bufferArrayuni.slice(-1).pop()))
             peer.send('final')
           }
         })
@@ -289,7 +278,9 @@ export default function Chat() {
                 ) : (
                   <div key={data.id} ref={messageContainer}>
                     <p style={{ color: '#fff', marginLeft: '5px' }}>
-                      <span style={{ color: '#ababab' }}>{data.name}</span> :{' '}
+                      <span style={{ color: '#ababab' }}>
+                        {data.name + ': '}
+                      </span>
                       {data.message}
                     </p>
                   </div>
