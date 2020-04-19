@@ -6,11 +6,11 @@ import { v4 as uuid } from 'uuid'
 import { from } from 'rxjs'
 import './Chat.css'
 import { combaine } from './FileShare/Combine'
-// import speedometer from 'speedometer'
+import speedometer from 'speedometer'
 import formatBytes from '../../Tools/FileConvertor'
 
 let array = []
-// let speed = speedometer()
+let speed = speedometer()
 
 export default function Chat() {
   //handle state
@@ -20,6 +20,7 @@ export default function Chat() {
   const [Filetype, setType] = useState(null)
   const [final, setFinal] = useState({ final: false })
   const [err, setError] = useState(false)
+  const [bytest, setBytest] = useState(0)
 
   const inputVariable = useRef()
   const file = useRef()
@@ -213,12 +214,11 @@ export default function Chat() {
       const stream = from(share)
       stream.subscribe((data) => {
         console.log(formatBytes(speed(data.byteLength)))
-        // let int = setInterval(function () {
-        //   setSpeed(formatBytes(speed(data.byteLength)))
-        // })
+        setBytest(formatBytes(speed(data.byteLength)))
 
         peer.write(new Buffer.from(data), () => {
           if (data.byteLength === 0) {
+            setBytest(0)
             peer.send('final')
           }
         })
@@ -282,6 +282,7 @@ export default function Chat() {
                         {data.name + ': '}
                       </span>
                       {data.message}
+                      {bytest ? '(' + bytest + '/s)' : ''}
                     </p>
                   </div>
                 )
