@@ -57,13 +57,13 @@ export default function List() {
   }
 
   socket.on('Joined', (data) => {
-    history.push(`/chat/?chat=${data.room}`)
+    history.push(`/chat/${data.room}`)
   })
 
   const handleAccept = () => {
     socket.emit('Join_by_ME', room)
     // console.log('Click this')
-    history.push(`/chat/?chat=${room.room}#init`)
+    history.push(`/chat/${room.room}#init`)
     // console.log(socket)
   }
 

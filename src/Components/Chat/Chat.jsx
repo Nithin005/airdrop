@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import peer, { name_of_room } from './Peer'
+import peer from './Peer'
 import { share_file, bufferArrayuni } from './FileShare/File.js'
 import Success from './Success'
 import { v4 as uuid } from 'uuid'
@@ -8,7 +8,7 @@ import './Chat.css'
 import { combaine } from './FileShare/Combine'
 import speedometer from 'speedometer'
 import formatBytes from '../../Tools/FileConvertor'
-
+import { useParams } from 'react-router-dom'
 let array = []
 let speed = speedometer()
 
@@ -26,6 +26,10 @@ export default function Chat() {
   const file = useRef()
   const messageContainer = useRef()
 
+  //get ID from the URL
+  let { id } = useParams()
+  console.log(id)
+
   //handle Submit
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -34,7 +38,7 @@ export default function Chat() {
     let data = {},
       name
     if (window.location.hash === '#init') {
-      name = name_of_room[1].split('-')
+      name = id.split('-')
       data = {
         id: uuid(),
         name: name[0],
@@ -198,10 +202,7 @@ export default function Chat() {
     let file_data = e.target.files[0]
     let datas = {
       id: uuid(),
-      name:
-        window.location.hash === '#init'
-          ? name_of_room[1].split('-')[0]
-          : 'Friend',
+      name: window.location.hash === '#init' ? id.split('-')[0] : 'Friend',
       message: `Sending a file with size ${formatBytes(file_data.size)} `,
       type: 'text/plain',
       sentAt: Date.now(),
@@ -257,7 +258,7 @@ export default function Chat() {
               </svg>
             </span>
           </a>
-          <header> {name_of_room[1]}</header>
+          <header> {id}</header>
         </div>
         <div className='Message'>
           {connected ? (
