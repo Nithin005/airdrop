@@ -1,6 +1,7 @@
 import socket from '../Functions/Users'
 import Peer from 'simple-peer'
 
+//Push this branch to github
 let got = false
 const peer = new Peer({
   initiator: window.location.hash === '#init',
